@@ -8,8 +8,15 @@ public class MapGenerator : MonoBehaviour
     [SerializeField] private int seed;
     [SerializeField] private int width;
     [SerializeField] private int height;
+    [SerializeField] private float cellSize;
+    [SerializeField] private float cellHeight;
 
     [field: ReadOnly] [field: SerializeField] public GameObject Map { get; private set; }
+
+    [Header("Prefabs")]
+    [SerializeField] private GameObject wallPrefab;
+    [SerializeField] private GameObject ceilingPrefab;
+    [SerializeField] private GameObject floorPrefab;
 
     private enum NodeType
     {
@@ -30,8 +37,6 @@ public class MapGenerator : MonoBehaviour
     {
         Random.InitState(seed);
 
-        Map = new GameObject("Map");
-
         var frontier = new List<Vector2Int>();
         if (frontier == null) throw new ArgumentNullException(nameof(frontier));
 
@@ -50,7 +55,6 @@ public class MapGenerator : MonoBehaviour
         var startY = Random.Range(0, height);
         AddFrontier(startX, startY, frontier, nodes);
 
-        var count = 0;
         while (frontier.Count > 0)
         {
             var index = Random.Range(0, frontier.Count);
@@ -69,10 +73,44 @@ public class MapGenerator : MonoBehaviour
             AddFrontier(node.x + 1, node.y, frontier, nodes);
             AddFrontier(node.x, node.y - 1, frontier, nodes);
             AddFrontier(node.x, node.y + 1, frontier, nodes);
-            count++;
         }
 
-        Debug.Log($"Generated map with {count} nodes");
+        InstantiateMap();
+    }
+
+    private void InstantiateMap()
+    {
+        Map = new GameObject("Map");
+        var mapWidth = width + 1 + width * cellSize;
+        var mapHeight = height + 1 + height * cellSize;
+
+        var floor = Instantiate(floorPrefab, Vector3.zero, Quaternion.identity);
+        floor.transform.parent = Map.transform;
+        floor.transform.localScale = new Vector3(mapWidth, 1, mapHeight);
+
+        var ceiling = Instantiate(ceilingPrefab, new Vector3(0, cellHeight, 0), Quaternion.identity);
+        ceiling.transform.parent = Map.transform;
+        ceiling.transform.localScale = new Vector3(mapWidth, 1, mapHeight);
+
+        var outerWallUp = Instantiate(wallPrefab, new Vector3(0, cellHeight / 2, (mapHeight - 1) / 2),
+            Quaternion.identity);
+        outerWallUp.transform.parent = Map.transform;
+        outerWallUp.transform.localScale = new Vector3(mapWidth, cellHeight + 1, 1);
+
+        var outerWallDown = Instantiate(wallPrefab, new Vector3(0, cellHeight / 2, -(mapHeight - 1) / 2),
+            Quaternion.identity);
+        outerWallDown.transform.parent = Map.transform;
+        outerWallDown.transform.localScale = new Vector3(mapWidth, cellHeight + 1, 1);
+
+        var outerWallLeft = Instantiate(wallPrefab, new Vector3(-(mapWidth - 1) / 2, cellHeight / 2, 0),
+            Quaternion.identity);
+        outerWallLeft.transform.parent = Map.transform;
+        outerWallLeft.transform.localScale = new Vector3(1, cellHeight + 1, mapHeight);
+
+        var outerWallRight = Instantiate(wallPrefab, new Vector3((mapWidth - 1) / 2, cellHeight / 2, 0),
+            Quaternion.identity);
+        outerWallRight.transform.parent = Map.transform;
+        outerWallRight.transform.localScale = new Vector3(1, cellHeight + 1, mapHeight);
     }
 
     private void AddFrontier(int x, int y, List<Vector2Int> frontier, NodeType[,] nodes)
