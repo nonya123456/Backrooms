@@ -116,9 +116,4 @@ public class MapGenerator : MonoBehaviour
 
         return neighbors;
     }
-
-    public void DestroyMap()
-    {
-        DestroyImmediate(Map);
-    }
 }
