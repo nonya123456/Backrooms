@@ -20,7 +20,7 @@ public class MapGenerator : MonoBehaviour
 
     private void Start()
     {
-        if (Map == null)
+        if (!Map)
         {
             GenerateMap();
         }
