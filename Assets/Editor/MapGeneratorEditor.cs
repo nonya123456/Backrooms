@@ -12,11 +12,13 @@ namespace Editor
 
             if (DrawDefaultInspector())
             {
+                DestroyImmediate(mapGen.Map);
                 mapGen.GenerateMap();
             }
 
             if (GUILayout.Button("Generate"))
             {
+                DestroyImmediate(mapGen.Map);
                 mapGen.GenerateMap();
             }
         }

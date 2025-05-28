@@ -5,8 +5,11 @@ using Random = UnityEngine.Random;
 
 public class MapGenerator : MonoBehaviour
 {
+    [SerializeField] private int seed;
     [SerializeField] private int width;
     [SerializeField] private int height;
+
+    [field: ReadOnly] [field: SerializeField] public GameObject Map { get; private set; }
 
     private enum NodeType
     {
@@ -17,11 +20,18 @@ public class MapGenerator : MonoBehaviour
 
     private void Start()
     {
-        GenerateMap();
+        if (Map == null)
+        {
+            GenerateMap();
+        }
     }
 
     public void GenerateMap()
     {
+        Random.InitState(seed);
+
+        Map = new GameObject("Map");
+
         var frontier = new List<Vector2Int>();
         if (frontier == null) throw new ArgumentNullException(nameof(frontier));
 
@@ -105,5 +115,10 @@ public class MapGenerator : MonoBehaviour
         }
 
         return neighbors;
+    }
+
+    public void DestroyMap()
+    {
+        DestroyImmediate(Map);
     }
 }
