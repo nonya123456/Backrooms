@@ -37,12 +37,9 @@ public class MapGenerator : MonoBehaviour
     {
         Random.InitState(seed);
 
+        var edges = new HashSet<EdgeData>();
         var frontier = new List<Vector2Int>();
-        if (frontier == null) throw new ArgumentNullException(nameof(frontier));
-
         var nodes = new NodeType[width, height];
-        if (nodes == null) throw new ArgumentNullException(nameof(nodes));
-
         for (var y = 0; y < height; y++)
         {
             for (var x = 0; x < width; x++)
@@ -65,7 +62,14 @@ public class MapGenerator : MonoBehaviour
             if (neighbors.Count > 0)
             {
                 var selectedNeighbor = neighbors[Random.Range(0, neighbors.Count)];
-                Debug.Log($"Moving from {node} to {selectedNeighbor}");
+                if (node.x < selectedNeighbor.x || (node.x == selectedNeighbor.x && node.y < selectedNeighbor.y))
+                {
+                    edges.Add(new EdgeData { From = node, To = selectedNeighbor });
+                }
+                else
+                {
+                    edges.Add(new EdgeData { From = selectedNeighbor, To = node });
+                }
             }
 
             nodes[node.x, node.y] = NodeType.Visited;
@@ -75,10 +79,10 @@ public class MapGenerator : MonoBehaviour
             AddFrontier(node.x, node.y + 1, frontier, nodes);
         }
 
-        InstantiateMap();
+        InstantiateMap(edges);
     }
 
-    private void InstantiateMap()
+    private void InstantiateMap(HashSet<EdgeData> edges)
     {
         Map = new GameObject("Map");
         var mapWidth = width + 1 + width * cellSize;
@@ -111,6 +115,33 @@ public class MapGenerator : MonoBehaviour
             Quaternion.identity);
         outerWallRight.transform.parent = Map.transform;
         outerWallRight.transform.localScale = new Vector3(1, cellHeight + 1, mapHeight);
+
+        // TODO: Fix inner wall position
+        for (var y = 0; y < height; y++)
+        {
+            for (var x = 0; x < width; x++)
+            {
+                if (y < height - 1 && !edges.Contains(new EdgeData()
+                        { From = new Vector2Int(x, y), To = new Vector2Int(x, y + 1) }))
+                {
+                    var innerWall = Instantiate(wallPrefab,
+                        new Vector3(x - 1 + (x - 1) * cellSize, cellHeight / 2, y - 1 + (y - 1) * cellSize),
+                        Quaternion.identity);
+                    innerWall.transform.parent = Map.transform;
+                    innerWall.transform.localScale = new Vector3(cellSize + 2, cellHeight + 1, 1);
+                }
+
+                if (x < width - 1 && !edges.Contains(new EdgeData()
+                        { From = new Vector2Int(x, y), To = new Vector2Int(x + 1, y) }))
+                {
+                    var innerWall = Instantiate(wallPrefab,
+                        new Vector3(x - 2 + x * cellSize, cellHeight / 2, y + (y - 2) * cellSize),
+                        Quaternion.identity);
+                    innerWall.transform.parent = Map.transform;
+                    innerWall.transform.localScale = new Vector3(1, cellHeight + 1, cellSize + 2);
+                }
+            }
+        }
     }
 
     private void AddFrontier(int x, int y, List<Vector2Int> frontier, NodeType[,] nodes)
@@ -153,5 +184,26 @@ public class MapGenerator : MonoBehaviour
         }
 
         return neighbors;
+    }
+}
+
+public struct EdgeData : IEquatable<EdgeData>
+{
+    public Vector2Int From;
+    public Vector2Int To;
+
+    public bool Equals(EdgeData other)
+    {
+        return From.Equals(other.From) && To.Equals(other.To);
+    }
+
+    public override bool Equals(object obj)
+    {
+        return obj is EdgeData other && Equals(other);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(From, To);
     }
 }
