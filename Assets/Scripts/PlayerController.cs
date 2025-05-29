@@ -6,6 +6,7 @@ public class PlayerController : MonoBehaviour
     [Header("References")]
     [SerializeField] private CharacterController controller;
     [SerializeField] private Transform cameraTarget;
+    [SerializeField] private Transform flashlight;
     [ReadOnly] [SerializeField] private Vector2 moveInput;
     [ReadOnly] [SerializeField] private Vector2 lookInput;
 
@@ -80,6 +81,7 @@ public class PlayerController : MonoBehaviour
         pitch = Mathf.Clamp(pitch, bottomClamp, topClamp);
 
         cameraTarget.localRotation = Quaternion.Euler(pitch, 0.0f, 0.0f);
+        flashlight.localRotation = Quaternion.Euler(pitch, 0.0f, 0.0f);
 
         var horizontalRotate = lookInput.x * sensitivity;
         transform.Rotate(Vector3.up * horizontalRotate);

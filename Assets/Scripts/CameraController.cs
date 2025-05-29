@@ -6,6 +6,16 @@ public class CameraController : MonoBehaviour
 
     private void LateUpdate()
     {
+        Reset();
+    }
+
+    public void Reset()
+    {
+        if (!target)
+        {
+            return;
+        }
+
         transform.position = target.position;
         transform.rotation = target.rotation;
     }

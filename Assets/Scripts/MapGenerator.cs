@@ -92,9 +92,9 @@ public class MapGenerator : MonoBehaviour
         floor.transform.parent = Map.transform;
         floor.transform.localScale = new Vector3(mapWidth, 1, mapHeight);
 
-        // var ceiling = Instantiate(ceilingPrefab, new Vector3(0, cellHeight, 0), Quaternion.identity);
-        // ceiling.transform.parent = Map.transform;
-        // ceiling.transform.localScale = new Vector3(mapWidth, 1, mapHeight);
+        var ceiling = Instantiate(ceilingPrefab, new Vector3(0, cellHeight, 0), Quaternion.identity);
+        ceiling.transform.parent = Map.transform;
+        ceiling.transform.localScale = new Vector3(mapWidth, 1, mapHeight);
 
         var outerWallUp = Instantiate(wallPrefab, new Vector3(0, cellHeight / 2, (mapHeight - 1) / 2),
             Quaternion.identity);
