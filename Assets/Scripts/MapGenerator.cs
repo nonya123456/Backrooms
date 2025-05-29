@@ -92,9 +92,9 @@ public class MapGenerator : MonoBehaviour
         floor.transform.parent = Map.transform;
         floor.transform.localScale = new Vector3(mapWidth, 1, mapHeight);
 
-        var ceiling = Instantiate(ceilingPrefab, new Vector3(0, cellHeight, 0), Quaternion.identity);
-        ceiling.transform.parent = Map.transform;
-        ceiling.transform.localScale = new Vector3(mapWidth, 1, mapHeight);
+        // var ceiling = Instantiate(ceilingPrefab, new Vector3(0, cellHeight, 0), Quaternion.identity);
+        // ceiling.transform.parent = Map.transform;
+        // ceiling.transform.localScale = new Vector3(mapWidth, 1, mapHeight);
 
         var outerWallUp = Instantiate(wallPrefab, new Vector3(0, cellHeight / 2, (mapHeight - 1) / 2),
             Quaternion.identity);
@@ -116,7 +116,6 @@ public class MapGenerator : MonoBehaviour
         outerWallRight.transform.parent = Map.transform;
         outerWallRight.transform.localScale = new Vector3(1, cellHeight + 1, mapHeight);
 
-        // TODO: Fix inner wall position
         for (var y = 0; y < height; y++)
         {
             for (var x = 0; x < width; x++)
@@ -124,8 +123,9 @@ public class MapGenerator : MonoBehaviour
                 if (y < height - 1 && !edges.Contains(new EdgeData()
                         { From = new Vector2Int(x, y), To = new Vector2Int(x, y + 1) }))
                 {
-                    var innerWall = Instantiate(wallPrefab,
-                        new Vector3(x - 1 + (x - 1) * cellSize, cellHeight / 2, y - 1 + (y - 1) * cellSize),
+                    var posX = (cellSize + 1) * (x + 1) - cellSize / 2 - mapWidth / 2;
+                    var posY = (cellSize + 1) * (y + 1) + 0.5f - mapHeight / 2;
+                    var innerWall = Instantiate(wallPrefab, new Vector3(posX, cellHeight / 2, posY),
                         Quaternion.identity);
                     innerWall.transform.parent = Map.transform;
                     innerWall.transform.localScale = new Vector3(cellSize + 2, cellHeight + 1, 1);
@@ -134,8 +134,9 @@ public class MapGenerator : MonoBehaviour
                 if (x < width - 1 && !edges.Contains(new EdgeData()
                         { From = new Vector2Int(x, y), To = new Vector2Int(x + 1, y) }))
                 {
-                    var innerWall = Instantiate(wallPrefab,
-                        new Vector3(x - 2 + x * cellSize, cellHeight / 2, y + (y - 2) * cellSize),
+                    var posX = (cellSize + 1) * (x + 1) + 0.5f - mapWidth / 2;
+                    var posY = (cellSize + 1) * (y + 1) - cellSize / 2 - mapHeight / 2;
+                    var innerWall = Instantiate(wallPrefab, new Vector3(posX, cellHeight / 2, posY),
                         Quaternion.identity);
                     innerWall.transform.parent = Map.transform;
                     innerWall.transform.localScale = new Vector3(1, cellHeight + 1, cellSize + 2);
