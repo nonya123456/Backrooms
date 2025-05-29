@@ -10,6 +10,7 @@ public class MapGenerator : MonoBehaviour
     [SerializeField] private int height;
     [SerializeField] private float cellSize;
     [SerializeField] private float cellHeight;
+    [Range(0, 1)] [SerializeField] private float wallSpawnChance = 1f;
 
     [field: ReadOnly] [field: SerializeField] public GameObject Map { get; private set; }
 
@@ -120,8 +121,9 @@ public class MapGenerator : MonoBehaviour
         {
             for (var x = 0; x < width; x++)
             {
-                if (y < height - 1 && !edges.Contains(new EdgeData()
-                        { From = new Vector2Int(x, y), To = new Vector2Int(x, y + 1) }))
+                if (y < height - 1 &&
+                    !edges.Contains(new EdgeData() { From = new Vector2Int(x, y), To = new Vector2Int(x, y + 1) }) &&
+                    Random.value < wallSpawnChance)
                 {
                     var posX = (cellSize + 1) * (x + 1) - cellSize / 2 - mapWidth / 2;
                     var posY = (cellSize + 1) * (y + 1) + 0.5f - mapHeight / 2;
@@ -131,8 +133,9 @@ public class MapGenerator : MonoBehaviour
                     innerWall.transform.localScale = new Vector3(cellSize + 2, cellHeight + 1, 1);
                 }
 
-                if (x < width - 1 && !edges.Contains(new EdgeData()
-                        { From = new Vector2Int(x, y), To = new Vector2Int(x + 1, y) }))
+                if (x < width - 1 &&
+                    !edges.Contains(new EdgeData() { From = new Vector2Int(x, y), To = new Vector2Int(x + 1, y) }) &&
+                    Random.value < wallSpawnChance)
                 {
                     var posX = (cellSize + 1) * (x + 1) + 0.5f - mapWidth / 2;
                     var posY = (cellSize + 1) * (y + 1) - cellSize / 2 - mapHeight / 2;
