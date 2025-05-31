@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Unity.AI.Navigation;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -18,6 +19,9 @@ public class MapGenerator : MonoBehaviour
     [SerializeField] private GameObject wallPrefab;
     [SerializeField] private GameObject ceilingPrefab;
     [SerializeField] private GameObject floorPrefab;
+
+    [Header("References")]
+    [SerializeField] private NavMeshSurface navMeshSurface;
 
     private enum NodeType
     {
@@ -81,6 +85,7 @@ public class MapGenerator : MonoBehaviour
         }
 
         InstantiateMap(edges);
+        navMeshSurface.BuildNavMesh();
     }
 
     private void InstantiateMap(HashSet<EdgeData> edges)
@@ -96,6 +101,7 @@ public class MapGenerator : MonoBehaviour
         var ceiling = Instantiate(ceilingPrefab, new Vector3(0, cellHeight, 0), Quaternion.identity);
         ceiling.transform.parent = Map.transform;
         ceiling.transform.localScale = new Vector3(mapWidth, 1, mapHeight);
+        ceiling.layer = LayerMask.NameToLayer("Ceiling");
 
         var outerWallUp = Instantiate(wallPrefab, new Vector3(0, cellHeight / 2, (mapHeight - 1) / 2),
             Quaternion.identity);
