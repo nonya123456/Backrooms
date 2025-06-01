@@ -9,7 +9,7 @@ public class MonsterAI : MonoBehaviour
     [SerializeField] private MeshRenderer meshRenderer;
     [SerializeField] private NavMeshAgent agent;
     [SerializeField] private Transform playerTransform;
-    [SerializeField] private List<Transform> waypoints;
+    [ReadOnly] [SerializeField] private List<Transform> waypoints;
 
     [Header("AI")]
     [SerializeField] private float idleTime;
@@ -87,6 +87,15 @@ public class MonsterAI : MonoBehaviour
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
+        }
+    }
+
+    public void SetWaypoints(Transform waypointsTransform)
+    {
+        waypoints = new List<Transform>();
+        foreach (Transform child in waypointsTransform)
+        {
+            waypoints.Add(child);
         }
     }
 }

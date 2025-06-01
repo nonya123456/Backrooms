@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Unity.AI.Navigation;
+using Unity.VisualScripting;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -12,6 +13,9 @@ public class MapGenerator : MonoBehaviour
     [SerializeField] private float cellSize;
     [SerializeField] private float cellHeight;
     [Range(0, 1)] [SerializeField] private float wallSpawnChance = 1f;
+    [SerializeField] private int orbCount;
+    [SerializeField] private float orbY;
+    [SerializeField] private int waypointCount;
 
     [field: ReadOnly] [field: SerializeField] public GameObject Map { get; private set; }
 
@@ -19,9 +23,13 @@ public class MapGenerator : MonoBehaviour
     [SerializeField] private GameObject wallPrefab;
     [SerializeField] private GameObject ceilingPrefab;
     [SerializeField] private GameObject floorPrefab;
+    [SerializeField] private GameObject orbPrefab;
 
     [Header("References")]
     [SerializeField] private NavMeshSurface navMeshSurface;
+    [SerializeField] private CameraController cameraController;
+    [SerializeField] private Transform playerTransform;
+    [SerializeField] private MonsterAI monsterAI;
 
     private enum NodeType
     {
@@ -85,6 +93,15 @@ public class MapGenerator : MonoBehaviour
         }
 
         InstantiateMap(edges);
+
+        var orbGridPositions = SampleRange(0, width * height, orbCount);
+        InstantiateOrbs(orbGridPositions);
+        SetPlayerPosition(orbGridPositions);
+
+        var waypointGridPositions = SampleRange(0, width * height, waypointCount);
+        var waypoints = InstantiateWaypoints(waypointGridPositions);
+        monsterAI.SetWaypoints(waypoints.transform);
+
         navMeshSurface.BuildNavMesh();
     }
 
@@ -152,6 +169,94 @@ public class MapGenerator : MonoBehaviour
                 }
             }
         }
+    }
+
+    private void InstantiateOrbs(int[] gridPositions)
+    {
+        var mapWidth = width + 1 + width * cellSize;
+        var mapHeight = height + 1 + height * cellSize;
+
+        foreach (var gridPosition in gridPositions)
+        {
+            var x = gridPosition % width;
+            var y = gridPosition / width;
+            var posX = (cellSize + 1) * (x + 1) - cellSize / 2 - mapWidth / 2;
+            var posY = (cellSize + 1) * (y + 1) - cellSize / 2 - mapHeight / 2;
+            var orb = Instantiate(orbPrefab, new Vector3(posX, orbY, posY), Quaternion.identity);
+            orb.transform.parent = Map.transform;
+        }
+    }
+
+    private GameObject InstantiateWaypoints(int[] gridPositions)
+    {
+        var waypoints = new GameObject("Waypoints")
+        {
+            transform =
+            {
+                parent = Map.transform
+            }
+        };
+
+        var mapWidth = width + 1 + width * cellSize;
+        var mapHeight = height + 1 + height * cellSize;
+
+        foreach (var gridPosition in gridPositions)
+        {
+            var x = gridPosition % width;
+            var y = gridPosition / width;
+            var posX = (cellSize + 1) * (x + 1) - cellSize / 2 - mapWidth / 2;
+            var posY = (cellSize + 1) * (y + 1) - cellSize / 2 - mapHeight / 2;
+            _ = new GameObject("Waypoint")
+            {
+                transform =
+                {
+                    parent = waypoints.transform,
+                    localPosition = new Vector3(posX, 0, posY)
+                }
+            };
+        }
+
+        return waypoints;
+    }
+
+    private void SetPlayerPosition(int[] orbGridPositions)
+    {
+        var positions = new HashSet<int>();
+        positions.AddRange(orbGridPositions);
+
+        while (true)
+        {
+            var randomValue = Random.Range(0, width * height);
+            if (positions.Contains(randomValue))
+            {
+                continue;
+            }
+
+            var mapWidth = width + 1 + width * cellSize;
+            var mapHeight = height + 1 + height * cellSize;
+
+            var x = randomValue % width;
+            var y = randomValue / width;
+            var posX = (cellSize + 1) * (x + 1) - cellSize / 2 - mapWidth / 2;
+            var posY = (cellSize + 1) * (y + 1) - cellSize / 2 - mapHeight / 2;
+            playerTransform.position = new Vector3(posX, 0, posY);
+            cameraController.Reset();
+            return;
+        }
+    }
+
+    private static int[] SampleRange(int minInclusive, int maxExclusive, int count)
+    {
+        var selected = new HashSet<int>();
+        while (selected.Count < count)
+        {
+            var randomValue = Random.Range(minInclusive, maxExclusive);
+            selected.Add(randomValue);
+        }
+
+        var result = new int[count];
+        selected.CopyTo(result);
+        return result;
     }
 
     private void AddFrontier(int x, int y, List<Vector2Int> frontier, NodeType[,] nodes)
