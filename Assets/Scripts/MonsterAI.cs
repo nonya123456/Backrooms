@@ -73,15 +73,17 @@ public class MonsterAI : MonoBehaviour
             case State.Idle:
                 idleTimer = idleTime;
                 meshRenderer.enabled = false;
-                agent.SetDestination(transform.position);
+                agent.ResetPath();
                 break;
             case State.Stalking:
                 meshRenderer.enabled = true;
-                agent.SetDestination(transform.position);
+                agent.ResetPath();
+                WarpToFarthestWaypoint();
                 break;
             case State.Chasing:
                 chasingTimer = chasingTime;
                 meshRenderer.enabled = true;
+                WarpToFarthestWaypoint();
                 break;
         }
 
@@ -96,5 +98,22 @@ public class MonsterAI : MonoBehaviour
         {
             waypoints.Add(child);
         }
+    }
+
+    private void WarpToFarthestWaypoint()
+    {
+        var selected = 0;
+        var maxDistance = Vector3.Distance(playerTransform.position, waypoints[0].position);
+        for (var i = 1; i < waypoints.Count; i++)
+        {
+            var distance = Vector3.Distance(playerTransform.position, waypoints[i].position);
+            if (distance > maxDistance)
+            {
+                maxDistance = distance;
+                selected = i;
+            }
+        }
+
+        agent.Warp(waypoints[selected].position);
     }
 }
