@@ -14,9 +14,12 @@ public class MonsterAI : MonoBehaviour
     [SerializeField] private float idleTime;
     [ReadOnly] [SerializeField] private float idleTimer;
     [SerializeField] private float stalkingLevelThreshold;
-    [SerializeField] private float stalkingLevelRate;
+    [SerializeField] private AnimationCurve stalkingLevelRateByDistance;
+    [SerializeField] private float stalkingMaxDistance;
+    [SerializeField] private float stalkingSpeed;
     [ReadOnly] [SerializeField] private float stalkingLevel;
     [SerializeField] private float chasingTime;
+    [SerializeField] private float chasingSpeed;
     [ReadOnly] [SerializeField] private float chasingTimer;
 
     private enum State
@@ -46,7 +49,8 @@ public class MonsterAI : MonoBehaviour
 
                 break;
             case State.Stalking:
-                stalkingLevel += stalkingLevelRate * Time.deltaTime;
+                agent.SetDestination(playerTransform.position);
+                stalkingLevel += GetStalkingLevelRate() * Time.deltaTime;
                 if (stalkingLevel >= stalkingLevelThreshold)
                 {
                     stalkingLevel = 0;
@@ -78,11 +82,14 @@ public class MonsterAI : MonoBehaviour
             case State.Stalking:
                 meshRenderer.enabled = true;
                 agent.ResetPath();
+                agent.speed = stalkingSpeed;
                 WarpToFarthestWaypoint();
                 break;
             case State.Chasing:
                 chasingTimer = chasingTime;
                 meshRenderer.enabled = true;
+                agent.ResetPath();
+                agent.speed = chasingSpeed;
                 WarpToFarthestWaypoint();
                 break;
         }
@@ -98,6 +105,8 @@ public class MonsterAI : MonoBehaviour
         {
             waypoints.Add(child);
         }
+
+        transform.position = waypoints[0].position;
     }
 
     private void WarpToFarthestWaypoint()
@@ -115,5 +124,12 @@ public class MonsterAI : MonoBehaviour
         }
 
         agent.Warp(waypoints[selected].position);
+    }
+
+    private float GetStalkingLevelRate()
+    {
+        var distance = Vector3.Distance(playerTransform.position, transform.position);
+        var distanceNormalized = Mathf.Clamp01(distance / stalkingMaxDistance);
+        return stalkingLevelRateByDistance.Evaluate(distanceNormalized);
     }
 }
