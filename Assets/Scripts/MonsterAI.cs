@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
@@ -16,9 +15,7 @@ public class MonsterAI : MonoBehaviour
     [ReadOnly] [SerializeField] private float idleTimer;
     [SerializeField] private float stalkingLevelThreshold;
     [SerializeField] private float stalkingLevelRate;
-    [SerializeField] private float stalkingTime;
     [ReadOnly] [SerializeField] private float stalkingLevel;
-    [ReadOnly] [SerializeField] private float stalkingTimer;
     [SerializeField] private float chasingTime;
     [ReadOnly] [SerializeField] private float chasingTimer;
 
@@ -33,9 +30,7 @@ public class MonsterAI : MonoBehaviour
 
     private void Start()
     {
-        idleTimer = idleTime;
-        _state = State.Idle;
-        Debug.Log("Change to idle state");
+        ChangeState(State.Idle);
     }
 
     private void Update()
@@ -43,51 +38,55 @@ public class MonsterAI : MonoBehaviour
         switch (_state)
         {
             case State.Idle:
-                meshRenderer.enabled = false;
                 idleTimer -= Time.deltaTime;
                 if (idleTimer <= 0f)
                 {
-                    stalkingTimer = stalkingTime;
-                    _state = State.Stalking;
-                    Debug.Log("Change to stalking state");
+                    ChangeState(State.Stalking);
                 }
 
                 break;
             case State.Stalking:
-                meshRenderer.enabled = true;
-                stalkingTimer -= Time.deltaTime;
                 stalkingLevel += stalkingLevelRate * Time.deltaTime;
                 if (stalkingLevel >= stalkingLevelThreshold)
                 {
                     stalkingLevel = 0;
-                    chasingTimer = chasingTime;
-                    _state = State.Chasing;
-                    Debug.Log("Change to chasing state");
-                }
-                else if (stalkingTimer <= 0f)
-                {
-                    idleTimer = idleTime;
-                    _state = State.Idle;
-                    Debug.Log("Change to idle state");
+                    ChangeState(State.Chasing);
                 }
 
                 break;
             case State.Chasing:
-                meshRenderer.enabled = true;
                 agent.SetDestination(playerTransform.position);
                 chasingTimer -= Time.deltaTime;
                 if (chasingTimer <= 0f)
                 {
-                    agent.SetDestination(transform.position);
-                    idleTimer = idleTime;
-                    _state = State.Idle;
-                    Debug.Log("Change to idle state");
+                    ChangeState(State.Idle);
                 }
 
                 break;
-            default:
-                throw new ArgumentOutOfRangeException();
         }
+    }
+
+    private void ChangeState(State nextState)
+    {
+        switch (nextState)
+        {
+            case State.Idle:
+                idleTimer = idleTime;
+                meshRenderer.enabled = false;
+                agent.SetDestination(transform.position);
+                break;
+            case State.Stalking:
+                meshRenderer.enabled = true;
+                agent.SetDestination(transform.position);
+                break;
+            case State.Chasing:
+                chasingTimer = chasingTime;
+                meshRenderer.enabled = true;
+                break;
+        }
+
+        _state = nextState;
+        Debug.Log($"Current state: {_state}");
     }
 
     public void SetWaypoints(Transform waypointsTransform)

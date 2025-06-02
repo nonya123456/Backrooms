@@ -10,7 +10,6 @@ public class PlayerCollect : MonoBehaviour
     public void Collect()
     {
         _current += 1;
-        Debug.Log($"Collected {_current} orbs");
         OnCurrentChanged?.Invoke(_current);
     }
 }
