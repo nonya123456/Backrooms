@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
@@ -5,9 +6,11 @@ using UnityEngine.AI;
 public class MonsterAI : MonoBehaviour
 {
     [Header("References")]
-    [SerializeField] private MeshRenderer meshRenderer;
+    [SerializeField] private ToggleRenderer toggleRenderer;
     [SerializeField] private NavMeshAgent agent;
     [SerializeField] private Transform playerTransform;
+    [SerializeField] private Transform playerCameraTarget;
+    [SerializeField] private Transform eyePosition;
     [ReadOnly] [SerializeField] private List<Transform> waypoints;
 
     [Header("AI")]
@@ -18,9 +21,13 @@ public class MonsterAI : MonoBehaviour
     [SerializeField] private float stalkingMaxDistance;
     [SerializeField] private float stalkingSpeed;
     [ReadOnly] [SerializeField] private float stalkingLevel;
+    [SerializeField] private LayerMask obstacleLayerMask;
+    [SerializeField] private float playerViewDistance;
+    [SerializeField] private float playerViewAngle;
     [SerializeField] private float chasingTime;
     [SerializeField] private float chasingSpeed;
     [ReadOnly] [SerializeField] private float chasingTimer;
+    private bool _skipStateUpdate;
 
     private enum State
     {
@@ -38,6 +45,11 @@ public class MonsterAI : MonoBehaviour
 
     private void Update()
     {
+        if (_skipStateUpdate)
+        {
+            return;
+        }
+
         switch (_state)
         {
             case State.Idle:
@@ -49,6 +61,21 @@ public class MonsterAI : MonoBehaviour
 
                 break;
             case State.Stalking:
+                if (IsInPlayerView())
+                {
+                    Debug.Log("In player view.");
+                    var direction = (eyePosition.position - playerCameraTarget.position).normalized;
+                    var angle = Vector3.Angle(playerCameraTarget.forward, direction);
+                    Debug.Log($"Angle: {angle}");
+                    var realDistance = Vector3.Distance(playerCameraTarget.position, eyePosition.position) -
+                                       float.Epsilon;
+                    var distance = Mathf.Min(realDistance, playerViewDistance);
+                    Debug.Log($"Distance: {distance}");
+
+                    StartCoroutine(HandleInPlayerView());
+                    return;
+                }
+
                 agent.SetDestination(playerTransform.position);
                 stalkingLevel += GetStalkingLevelRate() * Time.deltaTime;
                 if (stalkingLevel >= stalkingLevelThreshold)
@@ -72,22 +99,24 @@ public class MonsterAI : MonoBehaviour
 
     private void ChangeState(State nextState)
     {
+        _skipStateUpdate = false;
+
         switch (nextState)
         {
             case State.Idle:
                 idleTimer = idleTime;
-                meshRenderer.enabled = false;
+                toggleRenderer.DisableRenderers();
                 agent.ResetPath();
                 break;
             case State.Stalking:
-                meshRenderer.enabled = true;
+                toggleRenderer.EnableRenderers();
                 agent.ResetPath();
                 agent.speed = stalkingSpeed;
                 WarpToFarthestWaypoint();
                 break;
             case State.Chasing:
+                toggleRenderer.EnableRenderers();
                 chasingTimer = chasingTime;
-                meshRenderer.enabled = true;
                 agent.ResetPath();
                 agent.speed = chasingSpeed;
                 WarpToFarthestWaypoint();
@@ -131,5 +160,30 @@ public class MonsterAI : MonoBehaviour
         var distance = Vector3.Distance(playerTransform.position, transform.position);
         var distanceNormalized = Mathf.Clamp01(distance / stalkingMaxDistance);
         return stalkingLevelRateByDistance.Evaluate(distanceNormalized);
+    }
+
+    private bool IsInPlayerView()
+    {
+        var direction = (eyePosition.position - playerCameraTarget.position).normalized;
+        var angle = Vector3.Angle(playerCameraTarget.forward, direction);
+        if (angle > playerViewAngle)
+        {
+            return false;
+        }
+
+        var realDistance = Vector3.Distance(playerCameraTarget.position, eyePosition.position) - float.Epsilon;
+        if (realDistance > playerViewDistance)
+        {
+            return false;
+        }
+
+        return !Physics.Raycast(playerCameraTarget.position, direction, realDistance, obstacleLayerMask);
+    }
+
+    private IEnumerator HandleInPlayerView()
+    {
+        _skipStateUpdate = true;
+        yield return new WaitForSeconds(0.5f);
+        ChangeState(State.Idle);
     }
 }
