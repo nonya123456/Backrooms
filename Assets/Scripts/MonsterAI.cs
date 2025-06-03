@@ -63,15 +63,6 @@ public class MonsterAI : MonoBehaviour
             case State.Stalking:
                 if (IsInPlayerView())
                 {
-                    Debug.Log("In player view.");
-                    var direction = (eyePosition.position - playerCameraTarget.position).normalized;
-                    var angle = Vector3.Angle(playerCameraTarget.forward, direction);
-                    Debug.Log($"Angle: {angle}");
-                    var realDistance = Vector3.Distance(playerCameraTarget.position, eyePosition.position) -
-                                       float.Epsilon;
-                    var distance = Mathf.Min(realDistance, playerViewDistance);
-                    Debug.Log($"Distance: {distance}");
-
                     StartCoroutine(HandleInPlayerView());
                     return;
                 }

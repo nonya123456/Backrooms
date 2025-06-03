@@ -211,7 +211,7 @@ public class MapGenerator : MonoBehaviour
                 transform =
                 {
                     parent = waypoints.transform,
-                    localPosition = new Vector3(posX, 0, posY)
+                    localPosition = new Vector3(posX, 0.5f, posY)
                 }
             };
         }
@@ -239,7 +239,7 @@ public class MapGenerator : MonoBehaviour
             var y = randomValue / width;
             var posX = (cellSize + 1) * (x + 1) - cellSize / 2 - mapWidth / 2;
             var posY = (cellSize + 1) * (y + 1) - cellSize / 2 - mapHeight / 2;
-            playerTransform.position = new Vector3(posX, 0, posY);
+            playerTransform.position = new Vector3(posX, 0.5f, posY);
             cameraController.Reset();
             return;
         }
