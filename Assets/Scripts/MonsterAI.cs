@@ -20,6 +20,7 @@ public class MonsterAI : MonoBehaviour
     [SerializeField] private AnimationCurve stalkingLevelRateByDistance;
     [SerializeField] private float stalkingMaxDistance;
     [SerializeField] private float stalkingSpeed;
+    [SerializeField] private float bonusStalkingLevelInPlayerView;
     [ReadOnly] [SerializeField] private float stalkingLevel;
     [SerializeField] private LayerMask obstacleLayerMask;
     [SerializeField] private float playerViewDistance;
@@ -192,6 +193,7 @@ public class MonsterAI : MonoBehaviour
     private IEnumerator HandleInPlayerView()
     {
         _skipStateUpdate = true;
+        stalkingLevel += bonusStalkingLevelInPlayerView;
         yield return new WaitForSeconds(0.5f);
         ChangeState(State.Idle);
     }
