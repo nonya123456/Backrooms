@@ -38,6 +38,11 @@ public class MonsterAI : MonoBehaviour
 
     private State _state;
 
+    private void Awake()
+    {
+        agent.updateRotation = false;
+    }
+
     private void Start()
     {
         ChangeState(State.Idle);
@@ -45,6 +50,8 @@ public class MonsterAI : MonoBehaviour
 
     private void Update()
     {
+        UpdateRotation();
+
         if (_skipStateUpdate)
         {
             return;
@@ -85,6 +92,17 @@ public class MonsterAI : MonoBehaviour
                 }
 
                 break;
+        }
+    }
+
+    private void UpdateRotation()
+    {
+        var directionToPlayer = playerTransform.position - transform.position;
+        directionToPlayer.y = 0;
+
+        if (directionToPlayer != Vector3.zero)
+        {
+            transform.rotation = Quaternion.LookRotation(directionToPlayer);
         }
     }
 
