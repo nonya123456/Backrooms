@@ -7,6 +7,7 @@ public class MonsterAI : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private ToggleRenderer toggleRenderer;
+    [SerializeField] private new Light light;
     [SerializeField] private NavMeshAgent agent;
     [SerializeField] private Transform playerTransform;
     [SerializeField] private Transform playerCameraTarget;
@@ -116,16 +117,19 @@ public class MonsterAI : MonoBehaviour
             case State.Idle:
                 idleTimer = idleTime;
                 toggleRenderer.DisableRenderers();
+                light.enabled = false;
                 agent.ResetPath();
                 break;
             case State.Stalking:
                 toggleRenderer.EnableRenderers();
+                light.enabled = false;
                 agent.ResetPath();
                 agent.speed = stalkingSpeed;
                 WarpToFarthestWaypoint();
                 break;
             case State.Chasing:
                 toggleRenderer.EnableRenderers();
+                light.enabled = true;
                 chasingTimer = chasingTime;
                 agent.ResetPath();
                 agent.speed = chasingSpeed;
