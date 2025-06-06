@@ -11,6 +11,7 @@ public class MonsterAI : MonoBehaviour
     [SerializeField] private NavMeshAgent agent;
     [SerializeField] private Transform playerTransform;
     [SerializeField] private Transform playerCameraTarget;
+    [SerializeField] private PlayerHealth playerHealth;
     [SerializeField] private Transform eyePosition;
     [ReadOnly] [SerializeField] private List<Transform> waypoints;
 
@@ -29,6 +30,7 @@ public class MonsterAI : MonoBehaviour
     [SerializeField] private float chasingTime;
     [SerializeField] private float chasingSpeed;
     [ReadOnly] [SerializeField] private float chasingTimer;
+    [SerializeField] private float attackRange;
     private bool _skipStateUpdate;
 
     private enum State
@@ -90,6 +92,13 @@ public class MonsterAI : MonoBehaviour
                 chasingTimer -= Time.deltaTime;
                 if (chasingTimer <= 0f)
                 {
+                    ChangeState(State.Idle);
+                    return;
+                }
+
+                if (IsInAttackRange())
+                {
+                    playerHealth.TakeDamage(1);
                     ChangeState(State.Idle);
                 }
 
@@ -192,6 +201,15 @@ public class MonsterAI : MonoBehaviour
         }
 
         return !Physics.Raycast(playerCameraTarget.position, direction, realDistance, obstacleLayerMask);
+    }
+
+    private bool IsInAttackRange()
+    {
+        var playerPosition = playerTransform.position;
+        var monsterPosition = transform.position;
+        playerPosition.y = 0f;
+        monsterPosition.y = 0f;
+        return Vector3.Distance(playerPosition, monsterPosition) < attackRange;
     }
 
     private IEnumerator HandleInPlayerView()
