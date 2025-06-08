@@ -11,12 +11,14 @@ public class PlayerController : MonoBehaviour
     [ReadOnly] [SerializeField] private Vector2 lookInput;
 
     [Header("Movement")]
-    [SerializeField] private float moveSpeed = 5f;
+    [SerializeField] private float moveSpeed = 3f;
+    [SerializeField] private float sprintSpeed = 5f;
     [SerializeField] private float airAcceleration = 15f;
     [SerializeField] private float gravity = -10f;
     [SerializeField] private float initialFallingSpeed = -2f;
     [SerializeField] private float maxFallingSpeed = -50f;
     [ReadOnly] [SerializeField] private Vector3 velocity;
+    [ReadOnly] [SerializeField] private bool isSprinting;
 
     [Header("Look")]
     [SerializeField] private float sensitivity = 1f;
@@ -65,7 +67,8 @@ public class PlayerController : MonoBehaviour
         if (moveInput.magnitude > 0.1f)
         {
             var direction = (transform.right * moveInput.x + transform.forward * moveInput.y).normalized;
-            planarVelocity = direction * moveSpeed;
+            var speed = isSprinting ? sprintSpeed : moveSpeed;
+            planarVelocity = direction * speed;
         }
 
         if (controller.isGrounded)
@@ -109,5 +112,10 @@ public class PlayerController : MonoBehaviour
     private void OnLook(InputValue value)
     {
         lookInput = value.Get<Vector2>();
+    }
+
+    private void OnSprint(InputValue value)
+    {
+        isSprinting = value.isPressed;
     }
 }
