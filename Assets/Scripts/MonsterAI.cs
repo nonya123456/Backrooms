@@ -6,11 +6,12 @@ using UnityEngine.AI;
 public class MonsterAI : MonoBehaviour
 {
     [Header("References")]
-    [SerializeField] private ToggleRenderer toggleRenderer;
+    [SerializeField] private MonsterEffect monsterEffect;
     [SerializeField] private new Light light;
     [SerializeField] private NavMeshAgent agent;
     [SerializeField] private Transform playerTransform;
     [SerializeField] private Transform playerCameraTarget;
+    [SerializeField] private Light playerLight;
     [SerializeField] private PlayerHealth playerHealth;
     [SerializeField] private Transform eyePosition;
     [ReadOnly] [SerializeField] private List<Transform> waypoints;
@@ -125,19 +126,19 @@ public class MonsterAI : MonoBehaviour
         {
             case State.Idle:
                 idleTimer = idleTime;
-                toggleRenderer.DisableRenderers();
+                monsterEffect.Hide();
                 light.enabled = false;
                 agent.ResetPath();
                 break;
             case State.Stalking:
-                toggleRenderer.EnableRenderers();
+                monsterEffect.Show();
                 light.enabled = false;
                 agent.ResetPath();
                 agent.speed = stalkingSpeed;
                 WarpToFarthestWaypoint();
                 break;
             case State.Chasing:
-                toggleRenderer.EnableRenderers();
+                monsterEffect.Show();
                 light.enabled = true;
                 chasingTimer = chasingTime;
                 agent.ResetPath();
@@ -216,7 +217,10 @@ public class MonsterAI : MonoBehaviour
     {
         _skipStateUpdate = true;
         stalkingLevel += bonusStalkingLevelInPlayerView;
+        monsterEffect.Teleport();
+        playerLight.enabled = false;
         yield return new WaitForSeconds(0.5f);
         ChangeState(State.Idle);
+        playerLight.enabled = true;
     }
 }
