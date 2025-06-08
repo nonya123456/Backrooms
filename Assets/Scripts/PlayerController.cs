@@ -14,15 +14,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private float airAcceleration = 15f;
     [SerializeField] private float gravity = -10f;
-    [SerializeField] private float fastFallingGravity = -15f;
-    [SerializeField] private float jumpSpeed = 4.5f;
     [SerializeField] private float initialFallingSpeed = -2f;
     [SerializeField] private float maxFallingSpeed = -50f;
-    [SerializeField] private float jumpBufferTime = 0.1f;
-    [SerializeField] private float coyoteTime = 0.1f;
     [ReadOnly] [SerializeField] private Vector3 velocity;
-    private float _coyoteTimer;
-    private float _jumpBufferTimer;
 
     [Header("Look")]
     [SerializeField] private float sensitivity = 1f;
@@ -39,30 +33,8 @@ public class PlayerController : MonoBehaviour
     private void Update()
     {
         UpdateRotation();
-        UpdateJump();
         UpdateVelocity();
         controller.Move(velocity * Time.deltaTime);
-    }
-
-    private void UpdateJump()
-    {
-        if (controller.isGrounded)
-        {
-            _coyoteTimer = coyoteTime;
-        }
-        else if (_coyoteTimer > 0f)
-        {
-            _coyoteTimer -= Time.deltaTime;
-        }
-
-        _jumpBufferTimer -= Time.deltaTime;
-
-        if (_jumpBufferTimer > 0f && _coyoteTimer > 0f)
-        {
-            _jumpBufferTimer = 0f;
-            _coyoteTimer = 0f;
-            velocity.y = jumpSpeed;
-        }
     }
 
     private void UpdateRotation()
@@ -116,8 +88,7 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            var finalGravity = velocity.y > 0f ? gravity : fastFallingGravity;
-            velocity.y += finalGravity * Time.deltaTime;
+            velocity.y += gravity * Time.deltaTime;
             velocity.y = Mathf.Clamp(velocity.y, maxFallingSpeed, Mathf.Infinity);
         }
     }
@@ -138,10 +109,5 @@ public class PlayerController : MonoBehaviour
     private void OnLook(InputValue value)
     {
         lookInput = value.Get<Vector2>();
-    }
-
-    private void OnJump(InputValue value)
-    {
-        _jumpBufferTimer = jumpBufferTime;
     }
 }
