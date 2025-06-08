@@ -7,6 +7,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private CharacterController controller;
     [SerializeField] private Transform cameraTarget;
     [SerializeField] private Transform flashlight;
+    [SerializeField] private FlashlightController flashlightController;
     [ReadOnly] [SerializeField] private Vector2 moveInput;
     [ReadOnly] [SerializeField] private Vector2 lookInput;
 
@@ -37,6 +38,15 @@ public class PlayerController : MonoBehaviour
         UpdateRotation();
         UpdateVelocity();
         controller.Move(velocity * Time.deltaTime);
+
+        if (isSprinting)
+        {
+            flashlightController.SetSprintRate();
+        }
+        else
+        {
+            flashlightController.SetNormalRate();
+        }
     }
 
     private void UpdateRotation()

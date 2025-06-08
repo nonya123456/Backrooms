@@ -11,7 +11,7 @@ public class MonsterAI : MonoBehaviour
     [SerializeField] private NavMeshAgent agent;
     [SerializeField] private Transform playerTransform;
     [SerializeField] private Transform playerCameraTarget;
-    [SerializeField] private Light playerLight;
+    [SerializeField] private FlashlightController flashlightController;
     [SerializeField] private PlayerHealth playerHealth;
     [SerializeField] private Transform eyePosition;
     [ReadOnly] [SerializeField] private List<Transform> waypoints;
@@ -218,9 +218,9 @@ public class MonsterAI : MonoBehaviour
         _skipStateUpdate = true;
         stalkingLevel += bonusStalkingLevelInPlayerView;
         monsterEffect.Teleport();
-        playerLight.enabled = false;
+        flashlightController.DisableFlashlight();
         yield return new WaitForSeconds(0.5f);
         ChangeState(State.Idle);
-        playerLight.enabled = true;
+        flashlightController.EnableFlashlight();
     }
 }
