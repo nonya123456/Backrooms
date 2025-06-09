@@ -148,7 +148,6 @@ public class MonsterAI : MonoBehaviour
         }
 
         _state = nextState;
-        Debug.Log($"Current state: {_state}");
     }
 
     public void SetWaypoints(Transform waypointsTransform)
