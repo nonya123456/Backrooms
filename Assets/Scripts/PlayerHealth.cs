@@ -1,9 +1,12 @@
+using System;
 using UnityEngine;
 
 public class PlayerHealth : MonoBehaviour
 {
     [SerializeField] private int maxHealth = 2;
     [ReadOnly] [SerializeField] private int currentHealth;
+
+    public Action OnPlayerDied;
 
     private void Awake()
     {
@@ -15,7 +18,7 @@ public class PlayerHealth : MonoBehaviour
         currentHealth -= damage;
         if (currentHealth <= 0)
         {
-            Debug.Log("Game Over");
+            OnPlayerDied?.Invoke();
         }
     }
 }

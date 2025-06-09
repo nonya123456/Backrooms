@@ -8,13 +8,13 @@ public class CollectedText : MonoBehaviour
     [SerializeField] private TextMeshProUGUI text;
     private int _showCount;
 
-    private void Awake()
+    private void OnEnable()
     {
         text.enabled = false;
         playerCollect.OnCurrentChanged += OnCurrentChanged;
     }
 
-    private void OnDestroy()
+    private void OnDisable()
     {
         playerCollect.OnCurrentChanged -= OnCurrentChanged;
     }
