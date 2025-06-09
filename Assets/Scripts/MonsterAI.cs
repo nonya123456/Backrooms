@@ -32,7 +32,6 @@ public class MonsterAI : MonoBehaviour
     [SerializeField] private float chasingSpeed;
     [ReadOnly] [SerializeField] private float chasingTimer;
     [SerializeField] private float attackRange;
-    private bool _skipStateUpdate;
 
     private enum State
     {
@@ -41,7 +40,8 @@ public class MonsterAI : MonoBehaviour
         Chasing,
     }
 
-    private State _state;
+    [ReadOnly] [SerializeField] private State state;
+    private bool _skipStateUpdate;
 
     private void Awake()
     {
@@ -62,7 +62,7 @@ public class MonsterAI : MonoBehaviour
             return;
         }
 
-        switch (_state)
+        switch (state)
         {
             case State.Idle:
                 idleTimer -= Time.deltaTime;
@@ -147,7 +147,7 @@ public class MonsterAI : MonoBehaviour
                 break;
         }
 
-        _state = nextState;
+        state = nextState;
     }
 
     public void SetWaypoints(Transform waypointsTransform)
