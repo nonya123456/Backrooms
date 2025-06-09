@@ -27,12 +27,6 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float bottomClamp = -89f;
     [ReadOnly] [SerializeField] private float pitch;
 
-    private void Awake()
-    {
-        Cursor.visible = false;
-        Cursor.lockState = CursorLockMode.Locked;
-    }
-
     private void Update()
     {
         UpdateRotation();

@@ -1,6 +1,7 @@
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -15,6 +16,12 @@ public class GameManager : MonoBehaviour
     [SerializeField] private int orbGoal = 5;
     private int _justCollectedCount;
     private bool _isEnded;
+
+    private void Awake()
+    {
+        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked;
+    }
 
     private void OnEnable()
     {
@@ -56,6 +63,7 @@ public class GameManager : MonoBehaviour
             overlayText.text = "You Win";
             _isEnded = true;
             Pause();
+            StartCoroutine(LoadMainMenu());
         }
         else
         {
@@ -81,12 +89,18 @@ public class GameManager : MonoBehaviour
         overlayText.text = "Game Over";
         _isEnded = true;
         Pause();
+        StartCoroutine(LoadMainMenu());
     }
 
     private void Pause()
     {
-        Time.timeScale = 0f;
         playerController.enabled = false;
         monsterAI.enabled = false;
+    }
+
+    private static IEnumerator LoadMainMenu()
+    {
+        yield return new WaitForSeconds(2f);
+        SceneManager.LoadScene("MainMenuScene");
     }
 }
