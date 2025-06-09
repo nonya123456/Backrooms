@@ -60,7 +60,7 @@ public class GameManager : MonoBehaviour
 
         if (current >= orbGoal)
         {
-            overlayText.text = "You Win";
+            overlayText.text = "YOU WIN";
             _isEnded = true;
             Pause();
             StartCoroutine(LoadMainMenu());
@@ -86,7 +86,7 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        overlayText.text = "Game Over";
+        overlayText.text = "YOU DIED";
         _isEnded = true;
         Pause();
         StartCoroutine(LoadMainMenu());
