@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -33,7 +34,7 @@ public class MonsterAI : MonoBehaviour
     [ReadOnly] [SerializeField] private float chasingTimer;
     [SerializeField] private float attackRange;
 
-    private enum State
+    public enum State
     {
         Idle,
         Stalking,
@@ -42,6 +43,8 @@ public class MonsterAI : MonoBehaviour
 
     [ReadOnly] [SerializeField] private State state;
     private bool _skipStateUpdate;
+
+    public Action<State> OnStateChanged;
 
     private void Awake()
     {
@@ -148,6 +151,7 @@ public class MonsterAI : MonoBehaviour
         }
 
         state = nextState;
+        OnStateChanged?.Invoke(state);
     }
 
     public void SetWaypoints(Transform waypointsTransform)

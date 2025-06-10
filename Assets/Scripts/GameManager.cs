@@ -14,8 +14,8 @@ public class GameManager : MonoBehaviour
 
     [Header("Game Settings")]
     [SerializeField] private int orbGoal = 5;
-    private int _justCollectedCount;
     private bool _isEnded;
+    private int _showCount;
 
     private void Awake()
     {
@@ -27,28 +27,19 @@ public class GameManager : MonoBehaviour
     {
         playerCollect.OnOrbCollected += HandleOrbCollected;
         playerHealth.OnPlayerDied += HandlePlayerDeath;
+        monsterAI.OnStateChanged += HandleMonsterStateChanged;
     }
 
     private void OnDisable()
     {
         playerCollect.OnOrbCollected -= HandleOrbCollected;
         playerHealth.OnPlayerDied -= HandlePlayerDeath;
+        monsterAI.OnStateChanged -= HandleMonsterStateChanged;
     }
 
     private void Update()
     {
-        UpdateText();
-    }
-
-    private void UpdateText()
-    {
-        if (_isEnded)
-        {
-            overlayText.enabled = true;
-            return;
-        }
-
-        overlayText.enabled = _justCollectedCount > 0;
+        overlayText.enabled = _showCount > 0 || _isEnded;
     }
 
     private void HandleOrbCollected(int current)
@@ -60,23 +51,12 @@ public class GameManager : MonoBehaviour
 
         if (current >= orbGoal)
         {
-            overlayText.text = "YOU WIN";
-            _isEnded = true;
-            Pause();
-            StartCoroutine(LoadMainMenu());
+            EndGame("YOU WIN");
         }
         else
         {
-            overlayText.text = $"{current} / {orbGoal}";
-            StartCoroutine(ShowOrbCountCoroutine());
+            ShowOverlayText($"{current} / {orbGoal}");
         }
-    }
-
-    private IEnumerator ShowOrbCountCoroutine()
-    {
-        _justCollectedCount += 1;
-        yield return new WaitForSeconds(1f);
-        _justCollectedCount -= 1;
     }
 
     private void HandlePlayerDeath()
@@ -86,16 +66,44 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        overlayText.text = "YOU DIED";
-        _isEnded = true;
-        Pause();
-        StartCoroutine(LoadMainMenu());
+        EndGame("YOU DIED");
     }
 
-    private void Pause()
+    private void HandleMonsterStateChanged(MonsterAI.State state)
     {
+        if (_isEnded)
+        {
+            return;
+        }
+
+        if (state is MonsterAI.State.Chasing)
+        {
+            ShowOverlayText("RUN");
+        }
+    }
+
+    private void ShowOverlayText(string text)
+    {
+        overlayText.text = text;
+        StartCoroutine(ShowCoroutine());
+    }
+
+    private IEnumerator ShowCoroutine()
+    {
+        _showCount += 1;
+        yield return new WaitForSeconds(1f);
+        _showCount -= 1;
+    }
+
+    private void EndGame(string text)
+    {
+        overlayText.text = text;
+        _isEnded = true;
+
         playerController.enabled = false;
         monsterAI.enabled = false;
+
+        StartCoroutine(LoadMainMenu());
     }
 
     private static IEnumerator LoadMainMenu()
