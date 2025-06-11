@@ -2,6 +2,7 @@ using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Random = UnityEngine.Random;
 
 public class GameManager : MonoBehaviour
 {
@@ -11,9 +12,14 @@ public class GameManager : MonoBehaviour
     [SerializeField] private PlayerHealth playerHealth;
     [SerializeField] private PlayerController playerController;
     [SerializeField] private MonsterAI monsterAI;
+    [SerializeField] private MapGenerator mapGenerator;
 
     [Header("Game Settings")]
-    [SerializeField] private int orbGoal = 5;
+    [SerializeField] private int minMapLength = 8;
+    [SerializeField] private int maxMapLength = 12;
+    [SerializeField] private int minWaypointCount = 5;
+    [SerializeField] private int maxWaypointCount = 8;
+    [SerializeField] private int orbGoal = 10;
     private bool _isEnded;
     private int _showCount;
 
@@ -21,6 +27,25 @@ public class GameManager : MonoBehaviour
     {
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
+    }
+
+    private IEnumerator Start()
+    {
+        SetMapConfig();
+        mapGenerator.GenerateMap();
+        yield return null;
+        mapGenerator.BuildNavMesh();
+        ShowOverlayText($"0 / {orbGoal}");
+    }
+
+    private void SetMapConfig()
+    {
+        var seed = Random.Range(0, 10000);
+        var width = Random.Range(minMapLength, maxMapLength + 1);
+        var height = Random.Range(minMapLength, maxMapLength + 1);
+        var waypointCount = Random.Range(minWaypointCount, maxWaypointCount + 1);
+
+        mapGenerator.ResetConfig(seed, width, height, orbGoal, waypointCount);
     }
 
     private void OnEnable()

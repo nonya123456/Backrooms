@@ -38,11 +38,17 @@ public class MapGenerator : MonoBehaviour
         Visited,
     }
 
-    private void Start()
+    public void ResetConfig(int seed0, int width0, int height0, int orbCount0, int waypointCount0)
     {
-        if (!Map)
+        seed = seed0;
+        width = width0;
+        height = height0;
+        orbCount = orbCount0;
+        waypointCount = waypointCount0;
+
+        if (Map)
         {
-            GenerateMap();
+            Destroy(Map);
         }
     }
 
@@ -101,7 +107,10 @@ public class MapGenerator : MonoBehaviour
         var waypointGridPositions = SampleRange(0, width * height, waypointCount);
         var waypoints = InstantiateWaypoints(waypointGridPositions);
         monsterAI.SetWaypoints(waypoints.transform);
+    }
 
+    public void BuildNavMesh()
+    {
         navMeshSurface.BuildNavMesh();
     }
 
@@ -239,7 +248,7 @@ public class MapGenerator : MonoBehaviour
             var y = randomValue / width;
             var posX = (cellSize + 1) * (x + 1) - cellSize / 2 - mapWidth / 2;
             var posY = (cellSize + 1) * (y + 1) - cellSize / 2 - mapHeight / 2;
-            playerTransform.position = new Vector3(posX, 0.5f, posY);
+            playerTransform.position = new Vector3(posX, 1.0f, posY);
             cameraController.Reset();
             return;
         }

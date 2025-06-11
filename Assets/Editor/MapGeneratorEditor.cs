@@ -14,12 +14,14 @@ namespace Editor
             {
                 DestroyImmediate(mapGen.Map);
                 mapGen.GenerateMap();
+                mapGen.BuildNavMesh();
             }
 
             if (GUILayout.Button("Generate"))
             {
                 DestroyImmediate(mapGen.Map);
                 mapGen.GenerateMap();
+                mapGen.BuildNavMesh();
             }
         }
     }
