@@ -14,10 +14,6 @@ public class PlayerController : MonoBehaviour
     [Header("Movement")]
     [SerializeField] private float moveSpeed = 3f;
     [SerializeField] private float sprintSpeed = 5f;
-    [SerializeField] private float airAcceleration = 15f;
-    [SerializeField] private float gravity = -10f;
-    [SerializeField] private float initialFallingSpeed = -2f;
-    [SerializeField] private float maxFallingSpeed = -50f;
     [ReadOnly] [SerializeField] private Vector3 velocity;
     [ReadOnly] [SerializeField] private bool isSprinting;
 
@@ -75,37 +71,8 @@ public class PlayerController : MonoBehaviour
             planarVelocity = direction * speed;
         }
 
-        if (controller.isGrounded)
-        {
-            velocity.x = planarVelocity.x;
-            velocity.z = planarVelocity.z;
-        }
-        else
-        {
-            var horizontalVelocity = Vector3.ProjectOnPlane(velocity, Vector3.up);
-            var velocityChange = (planarVelocity - horizontalVelocity).normalized * (airAcceleration * Time.deltaTime);
-            var finalVelocity = horizontalVelocity + velocityChange;
-            velocity.x = finalVelocity.x;
-            velocity.z = finalVelocity.z;
-        }
-
-        if (controller.isGrounded && velocity.y <= 0f)
-        {
-            velocity.y = initialFallingSpeed;
-        }
-        else
-        {
-            velocity.y += gravity * Time.deltaTime;
-            velocity.y = Mathf.Clamp(velocity.y, maxFallingSpeed, Mathf.Infinity);
-        }
-    }
-
-    private void OnControllerColliderHit(ControllerColliderHit hit)
-    {
-        if (hit.normal.y < -0.7f)
-        {
-            velocity.y = initialFallingSpeed;
-        }
+        velocity.x = planarVelocity.x;
+        velocity.z = planarVelocity.z;
     }
 
     private void OnMove(InputValue value)
