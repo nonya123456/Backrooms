@@ -14,6 +14,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private PlayerController playerController;
     [SerializeField] private MonsterAI monsterAI;
     [SerializeField] private MapGenerator mapGenerator;
+    [SerializeField] private AudioSource audioSource;
 
     [Header("Game Settings")]
     [SerializeField] private int minMapLength = 8;
@@ -23,6 +24,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] private int orbGoal = 10;
     private bool _isEnded;
     private int _showCount;
+
+    [Header("Audio")]
+    [SerializeField] private AudioClip textShowClip;
 
     private void Awake()
     {
@@ -117,6 +121,7 @@ public class GameManager : MonoBehaviour
     private void ShowOverlayText(string text)
     {
         overlayText.text = text;
+        audioSource.PlayOneShot(textShowClip);
         StartCoroutine(ShowCoroutine());
     }
 

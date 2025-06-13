@@ -78,7 +78,6 @@ public class MonsterEffect : MonoBehaviour
 
     public void Footstep()
     {
-        audioSource.clip = footstepClip;
-        audioSource.Play();
+        audioSource.PlayOneShot(footstepClip);
     }
 }
