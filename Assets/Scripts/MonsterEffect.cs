@@ -3,12 +3,17 @@ using UnityEngine;
 
 public class MonsterEffect : MonoBehaviour
 {
+    [Header("Visual Effect")]
     [SerializeField] private AnimationCurve shrinkCurve;
     [SerializeField] private float shrinkDuration = 0.4f;
     private Renderer[] _renderers;
 
     private static readonly int ShrinkCenter = Shader.PropertyToID("_Shrink_Center");
     private static readonly int ShrinkMultiplier = Shader.PropertyToID("_Shrink_Multiplier");
+
+    [Header("Sound Effect")]
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip footstepClip;
 
     private void Awake()
     {
@@ -69,5 +74,11 @@ public class MonsterEffect : MonoBehaviour
             r.material.SetVector(ShrinkCenter, center);
             r.material.SetFloat(ShrinkMultiplier, multiplier);
         }
+    }
+
+    public void Footstep()
+    {
+        audioSource.clip = footstepClip;
+        audioSource.Play();
     }
 }
