@@ -8,6 +8,7 @@ public class GameManager : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private TextMeshProUGUI overlayText;
+    [SerializeField] private Transform playerTransform;
     [SerializeField] private PlayerCollect playerCollect;
     [SerializeField] private PlayerHealth playerHealth;
     [SerializeField] private PlayerController playerController;
@@ -36,6 +37,12 @@ public class GameManager : MonoBehaviour
         yield return null;
         mapGenerator.BuildNavMesh();
         ShowOverlayText($"0 / {orbGoal}");
+        ResolvePlayerPosition();
+    }
+
+    private void ResolvePlayerPosition()
+    {
+        playerTransform.position = new Vector3(playerTransform.position.x, 0.5f, playerTransform.position.z);
     }
 
     private void SetMapConfig()
