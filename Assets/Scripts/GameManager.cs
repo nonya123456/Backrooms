@@ -36,7 +36,7 @@ public class GameManager : MonoBehaviour
         mapGenerator.GenerateMap();
         yield return null;
         mapGenerator.BuildNavMesh();
-        ShowOverlayText($"0 / {orbGoal}");
+        ShowOverlayText($"0/{orbGoal}");
         ResolvePlayerPosition();
     }
 
@@ -87,7 +87,7 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            ShowOverlayText($"{current} / {orbGoal}");
+            ShowOverlayText($"{current}/{orbGoal}");
         }
     }
 
