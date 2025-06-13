@@ -16,6 +16,7 @@ public class MonsterAI : MonoBehaviour
     [SerializeField] private PlayerHealth playerHealth;
     [SerializeField] private Transform eyePosition;
     [ReadOnly] [SerializeField] private List<Transform> waypoints;
+    [SerializeField] private Animator animator;
 
     [Header("AI")]
     [SerializeField] private float idleTime;
@@ -128,12 +129,14 @@ public class MonsterAI : MonoBehaviour
         switch (nextState)
         {
             case State.Idle:
+                animator.SetTrigger("Idle");
                 idleTimer = idleTime;
                 monsterEffect.Hide();
                 light.enabled = false;
                 agent.ResetPath();
                 break;
             case State.Stalking:
+                animator.SetTrigger("Stalking");
                 monsterEffect.Show();
                 light.enabled = false;
                 agent.ResetPath();
@@ -141,6 +144,7 @@ public class MonsterAI : MonoBehaviour
                 WarpToFarthestWaypoint();
                 break;
             case State.Chasing:
+                animator.SetTrigger("Chasing");
                 monsterEffect.Show();
                 light.enabled = true;
                 chasingTimer = chasingTime;
