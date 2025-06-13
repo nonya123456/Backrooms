@@ -46,6 +46,7 @@ public class MonsterAI : MonoBehaviour
     private bool _skipStateUpdate;
 
     public Action<State> OnStateChanged;
+    public Action OnPlayerFound;
 
     private void Awake()
     {
@@ -226,6 +227,7 @@ public class MonsterAI : MonoBehaviour
         stalkingLevel += bonusStalkingLevelInPlayerView;
         monsterEffect.Teleport();
         flashlightController.DisableFlashlight();
+        OnPlayerFound?.Invoke();
         yield return new WaitForSeconds(0.5f);
         ChangeState(State.Idle);
         flashlightController.EnableFlashlight();

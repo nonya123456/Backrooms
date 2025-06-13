@@ -27,6 +27,7 @@ public class GameManager : MonoBehaviour
 
     [Header("Audio")]
     [SerializeField] private AudioClip textShowClip;
+    [SerializeField] private AudioClip monsterFoundClip;
 
     private void Awake()
     {
@@ -64,6 +65,7 @@ public class GameManager : MonoBehaviour
         playerCollect.OnOrbCollected += HandleOrbCollected;
         playerHealth.OnPlayerDied += HandlePlayerDeath;
         monsterAI.OnStateChanged += HandleMonsterStateChanged;
+        monsterAI.OnPlayerFound += PlayMonsterFoundClip;
     }
 
     private void OnDisable()
@@ -71,6 +73,7 @@ public class GameManager : MonoBehaviour
         playerCollect.OnOrbCollected -= HandleOrbCollected;
         playerHealth.OnPlayerDied -= HandlePlayerDeath;
         monsterAI.OnStateChanged -= HandleMonsterStateChanged;
+        monsterAI.OnPlayerFound -= PlayMonsterFoundClip;
     }
 
     private void Update()
@@ -147,5 +150,10 @@ public class GameManager : MonoBehaviour
     {
         yield return new WaitForSeconds(2f);
         SceneManager.LoadScene("MainMenuScene");
+    }
+
+    private void PlayMonsterFoundClip()
+    {
+        audioSource.PlayOneShot(monsterFoundClip);
     }
 }
