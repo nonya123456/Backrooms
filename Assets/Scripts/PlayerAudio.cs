@@ -14,15 +14,22 @@ public class PlayerAudio : MonoBehaviour
     private void OnEnable()
     {
         playerController.OnFootstep += PlayFootstepSound;
+        playerHealth.OnPlayerHurt += PlayHurtSound;
     }
 
     private void OnDisable()
     {
         playerController.OnFootstep -= PlayFootstepSound;
+        playerHealth.OnPlayerHurt -= PlayHurtSound;
     }
 
     private void PlayFootstepSound()
     {
-        audioSource.PlayOneShot(footstepClip);
+        audioSource.PlayOneShot(footstepClip, 0.1f);
+    }
+
+    private void PlayHurtSound()
+    {
+        audioSource.PlayOneShot(hurtClip);
     }
 }
