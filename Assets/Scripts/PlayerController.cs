@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -24,12 +25,15 @@ public class PlayerController : MonoBehaviour
     [ReadOnly] [SerializeField] private float pitch;
 
     [Header("View Bobbing")]
-    [SerializeField] private float bobAmount = 0.025f;
+    [SerializeField] private float bobAmplitude = 0.025f;
     [SerializeField] private float bobFrequency = 1f;
-    [SerializeField] private float sprintBobAmount = 0.05f;
+    [SerializeField] private float sprintBobAmplitude = 0.05f;
     [SerializeField] private float sprintBobFrequency = 2f;
-    private float _bobTimer;
+    private float _bobAmount;
+    private float _bobOffsetX;
     private Vector3 _originalFlashlightLocalPos;
+
+    public Action OnFootstep;
 
     private void Start()
     {
@@ -94,15 +98,22 @@ public class PlayerController : MonoBehaviour
     {
         if (moveInput.magnitude > 0.1f)
         {
-            _bobTimer += Time.deltaTime;
-            var frequency = isSprinting ? sprintBobFrequency : bobFrequency;
-            var amount = isSprinting ? sprintBobAmount : bobAmount;
-            var bobOffset = new Vector3(Mathf.Sin(2 * Mathf.PI * frequency * _bobTimer) * amount, 0f, 0f);
-            flashlight.localPosition = _originalFlashlightLocalPos + bobOffset;
+            _bobAmount += Time.deltaTime * (isSprinting ? sprintBobFrequency : bobFrequency);
+
+            var amp = isSprinting ? sprintBobAmplitude : bobAmplitude;
+            var lastOffsetX = _bobOffsetX;
+            _bobOffsetX = Mathf.Sin(2 * Mathf.PI * _bobAmount) * amp;
+
+            flashlight.localPosition = _originalFlashlightLocalPos + _bobOffsetX * Vector3.right;
+
+            if ((lastOffsetX < 0f && _bobOffsetX >= 0f) || (lastOffsetX >= 0f && _bobOffsetX < 0f))
+            {
+                OnFootstep?.Invoke();
+            }
         }
         else
         {
-            _bobTimer = 0f;
+            _bobAmount = 0f;
             flashlight.localPosition =
                 Vector3.Lerp(flashlight.localPosition, _originalFlashlightLocalPos, Time.deltaTime * 5f);
         }
