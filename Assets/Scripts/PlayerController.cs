@@ -23,6 +23,19 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float bottomClamp = -89f;
     [ReadOnly] [SerializeField] private float pitch;
 
+    [Header("View Bobbing")]
+    [SerializeField] private float bobAmount = 0.025f;
+    [SerializeField] private float bobFrequency = 1f;
+    [SerializeField] private float sprintBobAmount = 0.05f;
+    [SerializeField] private float sprintBobFrequency = 2f;
+    private float _bobTimer;
+    private Vector3 _originalFlashlightLocalPos;
+
+    private void Start()
+    {
+        _originalFlashlightLocalPos = flashlight.localPosition;
+    }
+
     private void Update()
     {
         UpdateRotation();
@@ -37,6 +50,8 @@ public class PlayerController : MonoBehaviour
         {
             flashlightController.SetNormalRate();
         }
+
+        UpdateFlashlightBobbing();
     }
 
     private void UpdateRotation()
@@ -73,6 +88,24 @@ public class PlayerController : MonoBehaviour
 
         velocity.x = planarVelocity.x;
         velocity.z = planarVelocity.z;
+    }
+
+    private void UpdateFlashlightBobbing()
+    {
+        if (moveInput.magnitude > 0.1f)
+        {
+            _bobTimer += Time.deltaTime;
+            var frequency = isSprinting ? sprintBobFrequency : bobFrequency;
+            var amount = isSprinting ? sprintBobAmount : bobAmount;
+            var bobOffset = new Vector3(Mathf.Sin(2 * Mathf.PI * frequency * _bobTimer) * amount, 0f, 0f);
+            flashlight.localPosition = _originalFlashlightLocalPos + bobOffset;
+        }
+        else
+        {
+            _bobTimer = 0f;
+            flashlight.localPosition =
+                Vector3.Lerp(flashlight.localPosition, _originalFlashlightLocalPos, Time.deltaTime * 5f);
+        }
     }
 
     private void OnMove(InputValue value)
