@@ -1,6 +1,8 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Random = UnityEngine.Random;
 
 public class PlayerController : MonoBehaviour
 {
@@ -9,6 +11,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Transform cameraTarget;
     [SerializeField] private Transform flashlight;
     [SerializeField] private FlashlightController flashlightController;
+    [SerializeField] private PlayerHealth playerHealth;
     [ReadOnly] [SerializeField] private Vector2 moveInput;
     [ReadOnly] [SerializeField] private Vector2 lookInput;
 
@@ -17,6 +20,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float sprintSpeed = 5f;
     [ReadOnly] [SerializeField] private Vector3 velocity;
     [ReadOnly] [SerializeField] private bool isSprinting;
+    private bool _isStunned;
 
     [Header("Look")]
     [SerializeField] private float sensitivity = 1f;
@@ -42,6 +46,11 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
+        if (_isStunned)
+        {
+            return;
+        }
+
         UpdateRotation();
         UpdateVelocity();
         controller.Move(velocity * Time.deltaTime);
@@ -132,5 +141,44 @@ public class PlayerController : MonoBehaviour
     private void OnSprint(InputValue value)
     {
         isSprinting = value.isPressed;
+    }
+
+    private void OnEnable()
+    {
+        playerHealth.OnPlayerHurt += HandlePlayerHurt;
+    }
+
+    private void OnDisable()
+    {
+        playerHealth.OnPlayerHurt += HandlePlayerHurt;
+    }
+
+    private void HandlePlayerHurt()
+    {
+        StartCoroutine(HandlePlayerHurtCoroutine());
+    }
+
+    private IEnumerator HandlePlayerHurtCoroutine()
+    {
+        _isStunned = true;
+
+        var originalPosition = cameraTarget.localPosition;
+        const float shakeDuration = 0.5f;
+        const float shakeIntensity = 0.05f;
+        var elapsed = 0f;
+        while (elapsed < shakeDuration)
+        {
+            var offsetX = Random.Range(-1f, 1f) * shakeIntensity;
+            var offsetY = Random.Range(-1f, 1f) * shakeIntensity;
+            cameraTarget.localPosition = originalPosition + new Vector3(offsetX, offsetY, 0f);
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        cameraTarget.localPosition = originalPosition;
+
+        yield return new WaitForSeconds(0.5f);
+
+        _isStunned = false;
     }
 }
